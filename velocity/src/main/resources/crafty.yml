@@ -1,0 +1,10 @@
+crafty-api:
+  host: "127.0.0.1"
+  port: 8000
+  username: "admin"
+  password: "securepassword"
+
+servers:
+  lobby: "server_id_1"
+  smp: "server_id_2"
+  creative: "server_id_3"

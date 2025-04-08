@@ -1,8 +1,10 @@
 package network.tecnocraft.paperlink.proxy;
 
 import com.google.inject.Inject;
+import com.velocitypowered.api.command.CommandMeta;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.PluginMessageEvent;
+import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
@@ -13,6 +15,8 @@ import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 public class PaperLinkProxyPlugin {
 
     private final ProxyServer server;
+    private final ConfigurationManager configManager;
+    private final CraftyManager craftyManager;
 
     private static final MinecraftChannelIdentifier BUNGEECORD_CHANNEL =
             MinecraftChannelIdentifier.from("bungeecord:main");
@@ -20,8 +24,20 @@ public class PaperLinkProxyPlugin {
     @Inject
     public PaperLinkProxyPlugin(ProxyServer server, @DataDirectory java.nio.file.Path dataDirectory) {
         this.server = server;
+        this.configManager = new ConfigurationManager(dataDirectory);
+        this.craftyManager = new CraftyManager(configManager);
         server.getChannelRegistrar().register(BUNGEECORD_CHANNEL);
     }
+
+    @Subscribe
+    public void onProxyInitialize(ProxyInitializeEvent event) {
+    CommandMeta meta = server.getCommandManager()
+        .metaBuilder("proxyserver")
+        .plugin(this)
+        .build();
+
+    server.getCommandManager().register(meta, new ProxyServerCommand(server, configManager, craftyManager));
+}
 
     @Subscribe
     public void onPluginMessage(PluginMessageEvent event) {
